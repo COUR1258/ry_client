@@ -1,5 +1,6 @@
 import { resolve } from 'path'
-import { defineConfig, externalizeDepsPlugin, loadEnv } from 'electron-vite'
+import { defineConfig, loadEnv } from 'electron-vite'
+import { bytecodePlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ command, mode }) => {
@@ -7,6 +8,7 @@ export default defineConfig(({ command, mode }) => {
   console.log(`当前运行模式：${mode}`)
   const env = loadEnv(mode)
   console.log(`当前运行模式：${env}`)
+  const encryptKey = String.fromCharCode(65, 66, 67)
   const IS_DEV = mode == 'development'
   //  gzip 压缩大小报告
   const IS_GZIP_REPORT = IS_DEV ? false : true
@@ -24,7 +26,7 @@ export default defineConfig(({ command, mode }) => {
         outDir: 'out/main',
         ...buildGeneral
       },
-      plugins: [externalizeDepsPlugin()]
+      plugins: [bytecodePlugin({ protectedStrings: [encryptKey] })]
     },
     preload: {
       build: {
@@ -32,7 +34,7 @@ export default defineConfig(({ command, mode }) => {
         outDir: 'out/preload',
         ...buildGeneral
       },
-      plugins: [externalizeDepsPlugin()]
+      plugins: [bytecodePlugin({ protectedStrings: [encryptKey] })]
     },
     renderer: {
       build: {
